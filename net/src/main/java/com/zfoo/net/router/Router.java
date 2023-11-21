@@ -184,6 +184,10 @@ public class Router implements IRouter {
             throw new RuntimeException(StringUtils.format("no any packetReceiver:[at{}] found for this packet:[{}] or no GatewayAttachment sent back if this server is gateway", name, name));
         }
 
+        // my接收协议的日志
+        logger.info("server receive，packetClazz={}, packetInfo={}, reciver={}",
+          clazz.getSimpleName(), packet, receiver.getClass().getSimpleName());
+
         switch (receiver.task()) {
             case TaskBus -> TaskBus.execute(taskExecutorHash, packetReceiverTask);
             case EventBus -> EventBus.asyncExecute(taskExecutorHash, packetReceiverTask);
@@ -206,6 +210,13 @@ public class Router implements IRouter {
             logger.warn("send msg error, protocol [{}] sid=[{}] uid=[{}] isActive=[{}] isWritable=[{}]"
                     , packet.getClass().getSimpleName(), session.getSid(), session.getUid(), channel.isActive(), channel.isWritable());
         }
+
+        // my服务器发送协议log
+        if (packet.getClass() != Heartbeat.class) {
+            logger.info("server send, packetInfo={}, attachment={}, session={}",
+              packet, attachment, session);
+        }
+
         channel.writeAndFlush(packetInfo);
     }
 
@@ -246,6 +257,10 @@ public class Router implements IRouter {
             if (answerClass != null && answerClass != responsePacket.getClass()) {
                 throw new UnexpectedProtocolException("client expect protocol:[{}], but found protocol:[{}]", answerClass, responsePacket.getClass().getName());
             }
+
+            // my接收协议的日志
+            logger.info("Sync server receive，packetClazz={}, packetInfo={}",
+              responsePacket.getClass().getSimpleName(), responsePacket);
 
             @SuppressWarnings("unchecked")
             var syncAnswer = new SyncAnswer<>((T) responsePacket, clientSignalAttachment);
@@ -291,6 +306,10 @@ public class Router implements IRouter {
                         if (answer == null) {
                             throw new NetTimeOutException("async ask [{}] timeout exception", packet.getClass().getSimpleName());
                         }
+
+                        // my接收协议的日志
+                        logger.info("Async server receive，packetClazz={}, packetInfo={}",
+                          answer.getClass().getSimpleName(), answer);
 
                         if (answer.getClass() == Error.class) {
                             throw new ErrorResponseException((Error) answer);
