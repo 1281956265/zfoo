@@ -77,4 +77,12 @@ public class HttpAttachment {
     public void setHttpResponseStatus(HttpResponseStatus httpResponseStatus) {
         this.httpResponseStatus = httpResponseStatus;
     }
+
+    @Override
+    public String toString() {
+        return "HttpAttachment{" +
+          "uid=" + uid +
+          ", taskExecutorHash=" + taskExecutorHash +
+          '}';
+    }
 }
