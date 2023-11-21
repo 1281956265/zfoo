@@ -184,6 +184,10 @@ public class Router implements IRouter {
             throw new RuntimeException(StringUtils.format("no any packetReceiver:[at{}] found for this packet:[{}] or no GatewayAttachment sent back if this server is gateway", name, name));
         }
 
+        // my接收协议的日志
+        logger.info("server receive，packetClazz={}, packetInfo={}, reciver={}",
+          clazz.getSimpleName(), packet, receiver.getClass().getSimpleName());
+
         switch (receiver.task()) {
             case TaskBus -> TaskBus.execute(taskExecutorHash, packetReceiverTask);
             case EventBus -> EventBus.asyncExecute(taskExecutorHash, packetReceiverTask);
@@ -210,6 +214,11 @@ public class Router implements IRouter {
             logger.warn("send msg error, protocol [{}] isActive=[{}] isWritable=[{}]"
                     , packet.getClass().getSimpleName(), channel.isActive(), channel.isWritable());
         }
+
+        // my服务器发送协议log
+        logger.info("server send, packetInfo={}, affachment={}, session={}",
+          packet, attachment, session);
+
         channel.writeAndFlush(packetInfo);
     }
 

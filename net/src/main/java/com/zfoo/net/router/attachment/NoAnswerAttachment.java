@@ -36,4 +36,11 @@ public class NoAnswerAttachment {
     public void setTaskExecutorHash(int taskExecutorHash) {
         this.taskExecutorHash = taskExecutorHash;
     }
+
+    @Override
+    public String toString() {
+        return "NoAnswerAttachment{" +
+          "taskExecutorHash=" + taskExecutorHash +
+          '}';
+    }
 }

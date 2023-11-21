@@ -125,7 +125,19 @@ public class SignalAttachment {
         return responseFuture;
     }
 
+    @Override
+    public String toString() {
+        return "SignalAttachment{" +
+          "signalId=" + signalId +
+          ", taskExecutorHash=" + taskExecutorHash +
+          ", client=" + client +
+          ", timestamp=" + timestamp +
+          '}';
+    }
+
     public void setResponseFuture(CompletableFuture<Object> responseFuture) {
+
+
         this.responseFuture = responseFuture;
     }
 }

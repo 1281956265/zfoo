@@ -118,4 +118,14 @@ public class GatewayAttachment {
         this.signalAttachment = signalAttachment;
     }
 
+    @Override
+    public String toString() {
+        return "GatewayAttachment{" +
+          "sid=" + sid +
+          ", uid=" + uid +
+          ", taskExecutorHash=" + taskExecutorHash +
+          ", client=" + client +
+          ", signalAttachment=" + signalAttachment +
+          '}';
+    }
 }
