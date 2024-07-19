@@ -60,8 +60,8 @@ public class MongodbAccessor implements IAccessor {
             @SuppressWarnings("unchecked")
             var entityClazz = (Class<E>) entity.getClass();
             var collection = OrmContext.getOrmManager().getCollection(entityClazz);
-
-            var filter = Filters.eq("_id", entity.id());
+            final String idName = OrmContext.getOrmManager().getEntityIdName(entityClazz);
+            var filter = Filters.eq(idName, entity.id());
 
             var result = collection.replaceOne(filter, entity);
             if (result.getModifiedCount() <= 0) {
@@ -85,9 +85,9 @@ public class MongodbAccessor implements IAccessor {
             @SuppressWarnings("unchecked")
             var entityClazz = (Class<E>) entities.get(0).getClass();
             var collection = OrmContext.getOrmManager().getCollection(entityClazz);
-
+            final String idName = OrmContext.getOrmManager().getEntityIdName(entityClazz);
             var batchList = entities.stream()
-                    .map(it -> new ReplaceOneModel<E>(Filters.eq("_id", it.id()), it))
+                    .map(it -> new ReplaceOneModel<E>(Filters.eq(idName, it.id()), it))
                     .toList();
 
             var result = collection.bulkWrite(batchList, new BulkWriteOptions().ordered(false));
@@ -105,14 +105,16 @@ public class MongodbAccessor implements IAccessor {
         @SuppressWarnings("unchecked")
         var entityClazz = (Class<E>) entity.getClass();
         var collection = OrmContext.getOrmManager().getCollection(entityClazz);
-        var result = collection.deleteOne(Filters.eq("_id", entity.id()));
+        final String idName = OrmContext.getOrmManager().getEntityIdName(entityClazz);
+        var result = collection.deleteOne(Filters.eq(idName, entity.id()));
         return result.getDeletedCount() > 0;
     }
 
     @Override
     public <PK extends Comparable<PK>, E extends IEntity<PK>> boolean delete(PK pk, Class<E> entityClazz) {
         var collection = OrmContext.getOrmManager().getCollection(entityClazz);
-        var result = collection.deleteOne(Filters.eq("_id", pk));
+        final String idName = OrmContext.getOrmManager().getEntityIdName(entityClazz);
+        var result = collection.deleteOne(Filters.eq(idName, pk));
         return result.getDeletedCount() > 0;
     }
 
@@ -125,20 +127,23 @@ public class MongodbAccessor implements IAccessor {
         var entityClazz = (Class<E>) entities.get(0).getClass();
         var collection = OrmContext.getOrmManager().getCollection(entityClazz);
         var ids = entities.stream().map(it -> (it).id()).toList();
-        collection.deleteMany(Filters.in("_id", ids));
+        final String idName = OrmContext.getOrmManager().getEntityIdName(entityClazz);
+        collection.deleteMany(Filters.in(idName, ids));
     }
 
     @Override
     public <PK extends Comparable<PK>, E extends IEntity<PK>> void batchDelete(List<PK> pks, Class<E> entityClazz) {
         var collection = OrmContext.getOrmManager().getCollection(entityClazz);
-        collection.deleteMany(Filters.in("_id", pks));
+        final String idName = OrmContext.getOrmManager().getEntityIdName(entityClazz);
+        collection.deleteMany(Filters.in(idName, pks));
     }
 
     @Override
     public <PK extends Comparable<PK>, E extends IEntity<PK>> E load(PK pk, Class<E> entityClazz) {
         var collection = OrmContext.getOrmManager().getCollection(entityClazz);
         var result = new ArrayList<E>(1);
-        collection.find(Filters.eq("_id", pk)).forEach(document -> result.add(document));
+        final String idName = OrmContext.getOrmManager().getEntityIdName(entityClazz);
+        collection.find(Filters.eq(idName, pk)).forEach(document -> result.add(document));
         if (CollectionUtils.isEmpty(result)) {
             return null;
         }

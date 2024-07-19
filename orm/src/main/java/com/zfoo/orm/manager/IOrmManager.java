@@ -52,4 +52,5 @@ public interface IOrmManager {
      */
     MongoCollection<Document> getCollection(String collection);
 
+    String getEntityIdName(Class<? extends IEntity<?>> clazz);
 }

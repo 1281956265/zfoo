@@ -96,8 +96,8 @@ public class EntityCache<PK extends Comparable<PK>, E extends IEntity<PK>> imple
                         wrapper.svs(entity, version + 1);
 
                         var filter = wrapper.gvs(entity) > 0
-                                ? Filters.and(Filters.eq("_id", entity.id()), Filters.eq(wrapper.versionFieldName(), version))
-                                : Filters.eq("_id", entity.id());
+                                ? Filters.and(Filters.eq(entityDef.getEntityIdName(), entity.id()), Filters.eq(wrapper.versionFieldName(), version))
+                                : Filters.eq(entityDef.getEntityIdName(), entity.id());
                         var result = collection.replaceOne(filter, entity);
                         if (result.getModifiedCount() <= 0) {
                             // 移除缓存时，更新数据库中的实体文档异常
@@ -332,8 +332,8 @@ public class EntityCache<PK extends Comparable<PK>, E extends IEntity<PK>> imple
                             wrapper.svs(it, version + 1);
 
                             var filter = wrapper.gvs(it) > 0
-                                    ? Filters.and(Filters.eq("_id", it.id()), Filters.eq(wrapper.versionFieldName(), version))
-                                    : Filters.eq("_id", it.id());
+                                    ? Filters.and(Filters.eq(entityDef.getEntityIdName(), it.id()), Filters.eq(wrapper.versionFieldName(), version))
+                                    : Filters.eq(entityDef.getEntityIdName(), it.id());
 
                             return new ReplaceOneModel<>(filter, it);
                         })
@@ -364,7 +364,7 @@ public class EntityCache<PK extends Comparable<PK>, E extends IEntity<PK>> imple
 
         var ids = updateList.stream().map(it -> it.id()).toList();
 
-        var dbList = OrmContext.getQuery(clazz).in("_id", ids).queryAll();
+        var dbList = OrmContext.getQuery(clazz).in(entityDef.getEntityIdName(), ids).queryAll();
         var dbMap = dbList.stream().collect(Collectors.toMap(key -> key.id(), value -> value));
         for (var entity : updateList) {
             var id = entity.id();

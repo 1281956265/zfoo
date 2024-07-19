@@ -66,6 +66,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class OrmManager implements IOrmManager {
 
     private static final Logger logger = LoggerFactory.getLogger(OrmManager.class);
+    private static final String _ID_NAME = "_id";
 
     private OrmConfig ormConfig;
 
@@ -80,6 +81,8 @@ public class OrmManager implements IOrmManager {
     private final Map<Class<? extends IEntity<?>>, IEntityCache<?, ?>> entityCachesMap = new HashMap<>();
 
     private final Map<Class<? extends IEntity<?>>, String> collectionNameMap = new ConcurrentHashMap<>();
+
+    private final Map<Class<? extends IEntity<?>>, String> entityIdNameMap = new ConcurrentHashMap<>();
 
     public OrmConfig getOrmConfig() {
         return ormConfig;
@@ -145,6 +148,9 @@ public class OrmManager implements IOrmManager {
             var entityClass = entry.getKey();
             var entityDef = entry.getValue();
             var indexDefMap = entityDef.getIndexDefMap();
+            if (entityDef.getEntityIdIndexDef() != null) {
+                indexDefMap.putIfAbsent(entityDef.getEntityIdName(), entityDef.getEntityIdIndexDef());
+            }
             if (CollectionUtils.isNotEmpty(indexDefMap)) {
                 var collection = mongodbDatabase.getCollection(collectionName(entityClass), entityClass);
                 for (var indexDef : indexDefMap.entrySet()) {
@@ -397,6 +403,12 @@ public class OrmManager implements IOrmManager {
 
         var idField = ReflectionUtils.getFieldsByAnnoInPOJOClass(clazz, Id.class)[0];
         ReflectionUtils.makeAccessible(idField);
+        String entityIdName = _ID_NAME;
+        IndexDef entityIdIndexDef = null;
+        if (!idField.getName().equals(_ID_NAME)) {
+            entityIdName = idField.getName();
+            entityIdIndexDef = new IndexDef(idField, true, true);
+        }
 
         var indexDefMap = new HashMap<String, IndexDef>();
         var fields = ReflectionUtils.getFieldsByAnnoInPOJOClass(clazz, Index.class);
@@ -414,15 +426,16 @@ public class OrmManager implements IOrmManager {
             indexTextDefMap.put(field.getName(), indexTextDef);
         }
 
-        return EntityDef.valueOf(!hasUnsafeCollection, cacheStrategy.getSize(), cacheStrategy.getExpireMillisecond(), persisterStrategy, indexDefMap, indexTextDefMap);
+        return EntityDef.valueOf(!hasUnsafeCollection, cacheStrategy.getSize(), cacheStrategy.getExpireMillisecond()
+          , persisterStrategy, indexDefMap, indexTextDefMap, entityIdName, entityIdIndexDef);
     }
 
-    private void checkIdField(Class<?> clazz) {
+    private void checkIdField(Class<? extends IEntity<?>> clazz) {
         // 是否实现了IEntity接口
         AssertionUtils.isTrue(IEntity.class.isAssignableFrom(clazz), "The entity:[{}] annotated by the [{}] annotation does not implement the interface [{}]"
                 , com.zfoo.orm.anno.EntityCache.class.getName(), clazz.getCanonicalName(), IEntity.class.getCanonicalName());
 
-        // 校验id字段和id()方法的格式，一个Entity类只能有一个@Id注解
+        // 校验@Id注解标注字段和id()方法的格式，一个Entity类只能有一个@Id注解
         var idFields = ReflectionUtils.getFieldsByAnnoInPOJOClass(clazz, Id.class);
         AssertionUtils.isTrue(ArrayUtils.isNotEmpty(idFields) && idFields.length == 1
                 , "The Entity[{}] must have only one @Id annotation (if it is indeed marked with an Id annotation, be careful not to use the Stored Id annotation)", clazz.getSimpleName());
@@ -431,13 +444,13 @@ public class OrmManager implements IOrmManager {
         // idField必须用private修饰
         AssertionUtils.isTrue(Modifier.isPrivate(idField.getModifiers()), "The id of the Entity[{}] must be private", clazz.getSimpleName());
 
-        // id的get方法的返回类型要和id字段一样，setId在hasUnsafeCollection方法中已经校验过了
+        // @Id注解标注字段的get方法的返回类型要和id字段一样，setId在hasUnsafeCollection方法中已经校验过了
         var getIdMethod = ReflectionUtils.getMethodByNameInPOJOClass(clazz, FieldUtils.fieldToGetMethod(clazz, idField));
         var returnTypeOfGetIdMethod = getIdMethod.getReturnType();
         AssertionUtils.isTrue(returnTypeOfGetIdMethod.equals(idFieldType), "[{}] getIdMethod:[{}] return type:[{}] must be equal with type id:[{}]"
                 , clazz.getSimpleName(), getIdMethod.getName(),returnTypeOfGetIdMethod.getName(), idFieldType.getName());
 
-        // 随机给id字段赋值，然后调用id()方法，看看两者的返回值是不是一样的，避免出错
+        // 随机给@Id注解标注字段赋值，然后调用id()方法，看看两者的返回值是不是一样的，避免出错
         var entityInstance = ReflectionUtils.newInstance(clazz);
         Object idFiledValue = null;
         if (idFieldType.equals(int.class) || idFieldType.equals(Integer.class)) {
@@ -457,7 +470,10 @@ public class OrmManager implements IOrmManager {
         }
 
         if (!idField.getName().equals("id")) {
-            throw new RunException("@Id filed must name with id");
+            if (ormConfig.isForceIdName()) {
+                throw new RunException("@Id filed must name with id! class=" + clazz.getSimpleName());
+            }
+            entityIdNameMap.putIfAbsent(clazz, idField.getName());
         }
 
         ReflectionUtils.makeAccessible(idField);
@@ -470,7 +486,7 @@ public class OrmManager implements IOrmManager {
         var idMethod = idMethodOptional.get();
         ReflectionUtils.makeAccessible(idMethod);
         var idMethodReturnValue = ReflectionUtils.invokeMethod(entityInstance, idMethod);
-        // 实体类Entity的id字段的返回值field和id方法的返回值method必须相等
+        // 实体类Entity的@Id注解标注字段的返回值field和id方法的返回值method必须相等
         AssertionUtils.isTrue(idFiledValue.equals(idMethodReturnValue), "The return value id [field:{}] of the Entity[{}] and the return value id [method:{}] are not equal, please check whether the id() method is implemented correctly"
                 , clazz.getSimpleName(), idFiledValue, idMethodReturnValue);
     }
@@ -623,5 +639,10 @@ public class OrmManager implements IOrmManager {
 
     private boolean isBaseType(Class<?> clazz) {
         return clazz.isPrimitive() || Number.class.isAssignableFrom(clazz) || String.class.isAssignableFrom(clazz);
+    }
+
+    @Override
+    public String getEntityIdName(Class<? extends IEntity<?>> clazz) {
+        return entityIdNameMap.getOrDefault(clazz, _ID_NAME);
     }
 }

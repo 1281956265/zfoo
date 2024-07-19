@@ -29,6 +29,11 @@ public class OrmConfig {
 
     private List<PersisterStrategy> persisters;
 
+    /**
+     * 是否校验所有Entity对象的@Id注解标注的字段名必须为"id"
+     */
+    private boolean forceIdName = true;
+
     public String getId() {
         return id;
     }
@@ -67,5 +72,13 @@ public class OrmConfig {
 
     public void setPersisters(List<PersisterStrategy> persisters) {
         this.persisters = persisters;
+    }
+
+    public boolean isForceIdName() {
+        return forceIdName;
+    }
+
+    public void setForceIdName(boolean forceIdName) {
+        this.forceIdName = forceIdName;
     }
 }

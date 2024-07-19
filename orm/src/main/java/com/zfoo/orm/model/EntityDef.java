@@ -34,9 +34,15 @@ public class EntityDef {
 
     private Map<String, IndexTextDef> indexTextDefMap;
 
+    /**
+     * 被@id注解标注的属性
+     */
+    private String entityIdName;
+    private IndexDef entityIdIndexDef;
 
     public static EntityDef valueOf(boolean threadSafe, int cacheSize, long expireMillisecond
-            , PersisterStrategy persisterStrategy, Map<String, IndexDef> indexDefMap, Map<String, IndexTextDef> indexTextDefMap) {
+            , PersisterStrategy persisterStrategy, Map<String, IndexDef> indexDefMap, Map<String, IndexTextDef> indexTextDefMap
+            , String entityIdName, IndexDef entityIdIndexDef) {
         var entityDef = new EntityDef();
         entityDef.threadSafe = threadSafe;
         entityDef.cacheSize = cacheSize;
@@ -44,6 +50,8 @@ public class EntityDef {
         entityDef.persisterStrategy = persisterStrategy;
         entityDef.indexDefMap = indexDefMap;
         entityDef.indexTextDefMap = indexTextDefMap;
+        entityDef.entityIdName = entityIdName;
+        entityDef.entityIdIndexDef = entityIdIndexDef;
         return entityDef;
     }
 
@@ -69,5 +77,13 @@ public class EntityDef {
 
     public Map<String, IndexTextDef> getIndexTextDefMap() {
         return indexTextDefMap;
+    }
+
+    public String getEntityIdName() {
+        return entityIdName;
+    }
+
+    public IndexDef getEntityIdIndexDef() {
+        return entityIdIndexDef;
     }
 }

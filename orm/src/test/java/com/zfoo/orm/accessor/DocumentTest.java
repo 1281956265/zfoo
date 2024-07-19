@@ -33,7 +33,8 @@ public class DocumentTest {
         var context = new ClassPathXmlApplicationContext("application.xml");
         OrmContext.getAccessor().delete(1L, UserEntity.class);
         var collection = OrmContext.getOrmManager().getCollection(UserEntity.class);
-        var result = collection.updateOne(Filters.eq("_id", 1), new Document("$inc", new Document("c", 1L)));
+        String idName = OrmContext.getOrmManager().getEntityIdName(UserEntity.class);
+        var result = collection.updateOne(Filters.eq(idName, 1), new Document("$inc", new Document("c", 1L)));
         System.out.println(result);
         ThreadUtils.sleep(Long.MAX_VALUE);
     }
