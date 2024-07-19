@@ -12,37 +12,37 @@
 
 package com.zfoo.boot;
 
-import com.zfoo.boot.graalvm.GraalvmStorageHints;
-import com.zfoo.storage.StorageContext;
-import com.zfoo.storage.config.StorageConfig;
-import com.zfoo.storage.manager.StorageManager;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.ImportRuntimeHints;
-
-/**
- * @author godotg
- */
-@Configuration(proxyBeanMethods = false)
-@ConditionalOnBean(StorageConfig.class)
-@ImportRuntimeHints(GraalvmStorageHints.class)
-public class StorageAutoConfiguration {
-
-    @Bean
-    @ConditionalOnMissingBean
-    @ConditionalOnBean(StorageConfig.class)
-    public StorageManager storageManager(StorageConfig storageConfig) {
-        var storageManager = new StorageManager();
-        storageManager.setStorageConfig(storageConfig);
-        return storageManager;
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public StorageContext storageContext() {
-        return new StorageContext();
-    }
-
-}
+//import com.zfoo.boot.graalvm.GraalvmStorageHints;
+//import com.zfoo.storage.StorageContext;
+//import com.zfoo.storage.config.StorageConfig;
+//import com.zfoo.storage.manager.StorageManager;
+//import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+//import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+//import org.springframework.context.annotation.Bean;
+//import org.springframework.context.annotation.Configuration;
+//import org.springframework.context.annotation.ImportRuntimeHints;
+//
+///**
+// * @author godotg
+// */
+//@Configuration(proxyBeanMethods = false)
+//@ConditionalOnBean(StorageConfig.class)
+//@ImportRuntimeHints(GraalvmStorageHints.class)
+//public class StorageAutoConfiguration {
+//
+//    @Bean
+//    @ConditionalOnMissingBean
+//    @ConditionalOnBean(StorageConfig.class)
+//    public StorageManager storageManager(StorageConfig storageConfig) {
+//        var storageManager = new StorageManager();
+//        storageManager.setStorageConfig(storageConfig);
+//        return storageManager;
+//    }
+//
+//    @Bean
+//    @ConditionalOnMissingBean
+//    public StorageContext storageContext() {
+//        return new StorageContext();
+//    }
+//
+//}
