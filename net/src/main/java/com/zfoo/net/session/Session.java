@@ -41,6 +41,8 @@ public class Session implements Closeable {
      */
     private long uid = 0;
 
+    private UserInfo userInfo = new UserInfo();
+
     /**
      * EN:Session extra parameters
      * CN:Session附带的属性参数，消费者的属性
@@ -104,5 +106,21 @@ public class Session implements Closeable {
 
     public void setConsumerRegister(Register consumerRegister) {
         this.consumerRegister = consumerRegister;
+    }
+
+    public UserInfo getUserInfo() {
+        return userInfo;
+    }
+
+    public static class UserInfo {
+        private long roleId;
+
+        public long getRoleId() {
+            return roleId;
+        }
+
+        public void setRoleId(long roleId) {
+            this.roleId = roleId;
+        }
     }
 }

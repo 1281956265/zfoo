@@ -77,9 +77,12 @@ public class Router implements IRouter {
     @Override
     public void receive(Session session, Object packet, @Nullable Object attachment) {
         if (packet.getClass() == Heartbeat.class) {
-            logger.info("server receive heartbeat from [sid:{}]", session.getSid());
+//            logger.info("server receive heartbeat from [sid:{}]", session.getSid());
             return;
         }
+        // 这里后续可以加上校验
+        // 只有LoginReq请求 可以session没有userId和roleId
+        // 只有EnterWorld请求 可以session可以没有roleId
 
         var task = new PacketReceiverTask(session, packet, attachment);
         if (attachment == null) {
@@ -453,8 +456,9 @@ public class Router implements IRouter {
 
             AssertionUtils.isTrue(!Modifier.isStatic(method.getModifiers()), "[class:{}] [method:{}] [packet:{}] can not use 'static' as modifier!", bean.getClass().getName(), methodName, packetName);
 
-            var expectedMethodName = StringUtils.format("at{}", packetClazz.getSimpleName());
-            AssertionUtils.isTrue(methodName.equals(expectedMethodName), "[class:{}] [method:{}] [packet:{}] expects '{}' as method name!", bean.getClass().getName(), methodName, packetName, expectedMethodName);
+            // 取消packetReceiver方法名字的检查
+//            var expectedMethodName = StringUtils.format("at{}", packetClazz.getSimpleName());
+//            AssertionUtils.isTrue(methodName.equals(expectedMethodName), "[class:{}] [method:{}] [packet:{}] expects '{}' as method name!", bean.getClass().getName(), methodName, packetName, expectedMethodName);
 
             // These rules are not necessary, but can reduce us from making low-level mistakes
             // If the request class name ends with Request which is for outer net client, then the attachment can not be a SignalAttachment
