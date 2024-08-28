@@ -48,11 +48,11 @@ public class NetAutoConfiguration {
         return new PacketService();
     }
 
-    @Bean
-    @ConditionalOnMissingBean
-    public Router router() {
-        return new Router();
-    }
+//    @Bean
+//    @ConditionalOnMissingBean
+//    public Router router() {
+//        return new Router();
+//    }
 
     @Bean
     @ConditionalOnMissingBean
