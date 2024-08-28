@@ -24,6 +24,9 @@ public enum Task {
 
     NettyIO,
 
-    VirtualThread;
+    VirtualThread,
 
+    World,
+
+    BattlePlayer;
 }
