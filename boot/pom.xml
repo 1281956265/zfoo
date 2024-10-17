@@ -70,11 +70,11 @@
             <version>${zfoo.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.zfoo</groupId>
-            <artifactId>orm</artifactId>
-            <version>${zfoo.version}</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.zfoo</groupId>-->
+<!--            <artifactId>orm</artifactId>-->
+<!--            <version>${zfoo.version}</version>-->
+<!--        </dependency>-->
 
         <dependency>
             <groupId>com.zfoo</groupId>

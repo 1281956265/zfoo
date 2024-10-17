@@ -20,6 +20,8 @@ public enum Task {
 
     TaskBus,
 
+    XDB,
+
     EventBus,
 
     NettyIO,
