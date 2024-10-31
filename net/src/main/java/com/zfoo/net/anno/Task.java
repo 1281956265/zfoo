@@ -18,17 +18,17 @@ package com.zfoo.net.anno;
  */
 public enum Task {
 
-    TaskBus,
+//    TaskBus,
 
     XDB,
 
-    EventBus,
+//    EventBus,
 
     NettyIO,
 
-    VirtualThread,
+//    VirtualThread,
 
     World,
 
-    BattlePlayer;
+//    BattlePlayer;
 }
